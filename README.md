@@ -1,4 +1,4 @@
-**Performance Evaluation of Deep Learning Techniques for Object Detection in Autonomous Vehicles.**
+<h2>Performance Evaluation of Deep Learning Techniques for Object Detection in Autonomous Vehicles.</h2>
 
 Object detection which has seen a rise in recent years being embedded in autonomous cars to perform the localization of objects on roadways by the computer imitating human behaviour and controlling the various blocks of the systems based on the conclusions obtained. The algorithms available which can perform this task are multiple and not all of them are suitable to be deployed in these safety–critical applications, hence the best of them should be chosen, but keeping in mind other challenges as well such as training of these algorithms to be able to perform adequately on the unseen data. Secondly, the main challenge of the ‘training’ phase can be solved to some extent by the pre-trained models available, but they do not guarantee efficient performances on the new data.
 
