@@ -8,7 +8,7 @@ from imutils.video import FPS
 file_path = os.path.dirname(os.path.abspath(__file__)) + os.sep
 outputFile = file_path + "test_out" + os.sep
 confThreshold = 0.5  # Confidence threshold
-nmsThreshold = 0.4   # Non-maximum suppression threshold（非最大抑制）
+nmsThreshold = 0.4   # Non-maximum suppression threshold
 inpWidth, inpHeight = 416, 416       # Width & height of network's input image
 
 # Usage example:  python object-detection-based-on-YOLOv3.py --video=run.mp4
@@ -71,19 +71,14 @@ def get_output_layers(net):
     for i in net.getUnconnectedOutLayers():
         print('i=',i)
     # Get the names of the output layers,
-    # yolov3中有类似于ssd的多尺度输出，这里有3个yolo层作输出，分别是200， 227， 254
     print('net.getUnconnectedOutLayers()=',net.getUnconnectedOutLayers())
     return [layers_names[i - 1] for i in net.getUnconnectedOutLayers()]
 
 
 def remove_non_max_boxes(detections):
-    # 遍历所有的bounding box，将置信度高于confidence threshold的保存
-    # 此时每一个object可能有多个bounding box
     class_ids, confidences, boxes = [], [], []
     for detection in detections:
         for tep in detection:
-            # tep的前四项为bounding box的中心坐标，长与宽；第5项为存在object的置信度
-            # 后面项为每一种object的置信度
             scores = tep[5:]
             class_id = np.argmax(scores)
             confidence = scores[class_id]
@@ -92,16 +87,14 @@ def remove_non_max_boxes(detections):
                 box_width, box_height = int(tep[2]*origin_w), int(tep[3]*origin_h)
                 box_left, box_top = int(center_x - box_width/2), int(center_y - box_height/2)
                 class_ids.append(class_id)
-                confidences.append(float(confidence))  # 注意将numpy.float转换为float
+                confidences.append(float(confidence))
                 boxes.append([box_left, box_top, box_width, box_height])
-    # 将上一步得到的结果进行non_max_suppression，保留每个object的最大置信度bounding box
     indices = cv.dnn.NMSBoxes(boxes, confidences, confThreshold, nmsThreshold)
     for i in indices:
         i = i
         box = boxes[i]
         x_start, y_start = box[0], box[1]
         x_end, y_end = x_start+box[2], y_start+box[3]
-        # 画bounding box以及label
         draw_box_label(class_ids[i], confidences[i], x_start, y_start, x_end, y_end)
 
 
@@ -131,9 +124,8 @@ def show_status(frame):
 
 
 if __name__ == '__main__':
-    # choosing image/video/webcam 并保存输出文件
+    # choosing image/video/webcam
     cap = choose_run_mode()
-    # 获取coco分类
     classes = get_coco_classes()
     # load YOLOv3 darknet model
     net = load_pretrain_model()
@@ -148,9 +140,8 @@ if __name__ == '__main__':
             print("Output file is stored as ", outputFile)
             cv.waitKey(3000)
             break
-        # 原始图像的像素尺度
+        # 原始像的像素尺度
         origin_h, origin_w = frame.shape[:2]
-        # 不同算法及训练模型的blobFromImage参数不同，可访问opencv的github地址查询
         # https://github.com/opencv/opencv/tree/master/samples/dnn
         blob = cv.dnn.blobFromImage(frame, 1 / 255, (inpWidth, inpHeight), [0, 0, 0], 1, crop=False)
         net.setInput(blob)
