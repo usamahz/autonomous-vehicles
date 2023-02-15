@@ -47,7 +47,7 @@ def get_coco_classes():
     classes_path = file_path+'Model'+os.sep+'coco.names'
     # reading & text mode
     with open(classes_path, 'rt') as f:
-        classes = f.read().split('\n')[:-1]  # 分割后去除最后一个空值
+        classes = f.read().split('\n')[:-1]
     return classes
 
 
@@ -149,17 +149,17 @@ if __name__ == '__main__':
             print("Output file is stored as ", outputFile)
             cv.waitKey(3000)
             break
-        # 原始像的像素尺度
+
         origin_h, origin_w = frame.shape[:2]
         # https://github.com/opencv/opencv/tree/master/samples/dnn
         blob = cv.dnn.blobFromImage(
             frame, 1 / 255, (inpWidth, inpHeight), [0, 0, 0], 1, crop=False)
         net.setInput(blob)
-        # 前向传播计算输出，YOLOv3有三个输出层
+        # YOLOv3
         detections = net.forward(get_output_layers(net))
-        # 进行非最大抑制non_max_suppression，每一个object保留一个box
+        #non_max_suppression, box
         remove_non_max_boxes(detections)
-        # 计算并显示Inference time及实时FPS
+        # Inference timeFPS
         show_status(frame)
 
         # Write the frame with the detection boxes
