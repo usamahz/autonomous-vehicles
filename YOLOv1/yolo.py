@@ -15,17 +15,13 @@ class Yolo(object):
     def __init__(self, weights_file):
         self.verbose = True
         # detection params
-        self.S = 7  # cell size，划分网格数
-        self.B = 2  # boxes_per_cell，每个网格负责目标个数
+        self.S = 7  # cell size
+        self.B = 2  # boxes_per_cell
         self.classes = ["aeroplane", "bicycle", "bird", "boat", "bottle",
                         "bus", "car", "cat", "chair", "cow", "diningtable",
                         "dog", "horse", "motorbike", "person", "pottedplant",
                         "sheep", "sofa", "train", "tvmonitor"]
         self.C = len(self.classes)  # number of classes
-        # (1)每个小格会对应B个边界框，边界框的宽高范围为全图，表示以该小格为中心寻找物体的边界框位置。
-        # (2)每个边界框对应一个分值，代表该处是否有物体及定位准确度
-        # (3)每个小格会对应C个概率值，找出最大概率对应的类别，并认为小格中包含该物体或者该物体的一部分。
-
         # offset for box center (top left point of each cell)
         self.x_offset = np.transpose(np.reshape(np.array([np.arange(self.S)]*self.S*self.B),
                                                 [self.B, self.S, self.S]), [1, 2, 0])
@@ -153,10 +149,6 @@ class Yolo(object):
         idx1 = self.S*self.S*self.C  # 7*7*20=980
         idx2 = idx1 + self.S*self.S*self.B  # 7*7*20+7*7*2=1078
 
-        # 输出的1470维向量，
-        # 前980为7*7个cell的各object的概率值，
-        # 980-1078为每个cell中的两个bounding boxes的置信度，
-        # 最后392维为所有bounding box的位置信息（7*7*2*4）
         # class prediction
         class_probs = np.reshape(predicts[:idx1], [self.S, self.S, self.C])
         # confidence
@@ -165,7 +157,6 @@ class Yolo(object):
         boxes = np.reshape(predicts[idx2:], [self.S, self.S, self.B, 4])
 
         # convert the x, y to the coordinates relative to the top left point of the image
-        # 还原box在图像中的真实比例位置
         boxes[:, :, :, 0] += self.x_offset
         boxes[:, :, :, 1] += self.y_offset
         boxes[:, :, :, :2] /= self.S
@@ -173,7 +164,6 @@ class Yolo(object):
         boxes[:, :, :, 2:] = np.square(boxes[:, :, :, 2:])
 
         # multiply the width and height of image
-        # 还原box的真实像素位置与大小
         boxes[:, :, :, 0] *= img_w
         boxes[:, :, :, 1] *= img_h
         boxes[:, :, :, 2] *= img_w
@@ -186,7 +176,6 @@ class Yolo(object):
         scores = np.reshape(scores, [-1, self.C])  # [7*7*2, 20]
         boxes = np.reshape(boxes, [-1, 4])         # [7*7*2, 4]
 
-        # filter the boxes when score < threhold，小于设定置信度的bounding box，置其置信度为0
         scores[scores < self.conf_threshold] = 0.0
         # non max suppression
         scores = self._non_max_suppression(scores, boxes)
@@ -208,15 +197,12 @@ class Yolo(object):
             sorted_idxs = np.argsort(scores[:, c])
             last = len(sorted_idxs) - 1
             while last > 0:
-                # 如果最大的score依然很小（接近0），说明该class在图中不存在，忽略该class
                 if scores[sorted_idxs[last], c] < 1e-6:
                     break
 
                 for i in range(last):
-                    # 如果某个object的score很小，忽略之 不进行非极大抑制
                     if scores[sorted_idxs[i], c] < 1e-6:
                         continue
-                    # 计算交并比，如果某个box与最大概率box的交并比很大，则删除之（概率置为0）
                     if self._iou(boxes[sorted_idxs[i]], boxes[sorted_idxs[last]]) > self.iou_threshold:
                         scores[sorted_idxs[i], c] = 0.0
                 last -= 1
