@@ -12,4 +12,4 @@
 
 - Finally, from the performance results of the new model, it was clear that this technique is effective and could serve as an efficient practice, thus solving the problem.
 
-![flow](./assets/Drawing%202023-02-12%2017.28.00.excalidraw.png)
+![flowDiagram](./assets/Drawing%202023-02-12%2017.28.00.excalidraw.png)
