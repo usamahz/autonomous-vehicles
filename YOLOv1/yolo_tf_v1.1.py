@@ -27,7 +27,6 @@ class Yolo(object):
         self.threshold = 0.1  # confidence scores threhold
         self.iou_threshold = 0.4
         #  the maximum number of boxes to be selected by non max suppression
-        # 图中最多可以利用NMS选中多少个边框，即最多可有多少个box（若为1，则只保留图中最大的一个box）
         self.max_output_size = 10
 
         self.sess = tf.Session()
