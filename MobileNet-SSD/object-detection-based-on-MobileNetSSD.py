@@ -97,7 +97,7 @@ if __name__ == '__main__':
             print("Output file is stored as ", outputFile)
             cv.waitKey(3000)
             break
-        # 原始图像的像素尺度
+
         origin_h, origin_w = frame.shape[:2]
         # 不同算法及训练模型的blobFromImage参数不同，可访问opencv的github地址查询
         # https://github.com/opencv/opencv/tree/master/samples/dnn
