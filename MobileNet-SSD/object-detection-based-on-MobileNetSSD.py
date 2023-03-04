@@ -113,18 +113,13 @@ if __name__ == '__main__':
                 bounding_box = detections[0, 0, i, 3:7] * \
                     np.array([origin_w, origin_h, origin_w, origin_h])
                 x_start, y_start, x_end, y_end = bounding_box.astype('int')
-                # 显示image中的object类别及其置信度
                 label = '{0}: {1:.2f}%'.format(CLASSES[idx], confidence * 100)
-                # 画bounding box
                 cv.rectangle(frame, (x_start, y_start),
                              (x_end, y_end), COLORS[idx], 2)
-                # 画文字的填充矿底色
                 cv.rectangle(frame, (x_start, y_start - 18),
                              (x_end, y_start), COLORS[idx], -1)
-                # detection result的文字显示
                 cv.putText(frame, label, (x_start + 2, y_start - 5),
                            cv.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
-        # 计算并显示Inference time及实时FPS
         show_status(frame)
         # Write the frame with the detection boxes
         if (args.image):
