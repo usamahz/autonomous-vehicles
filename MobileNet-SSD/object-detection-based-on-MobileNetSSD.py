@@ -99,12 +99,10 @@ if __name__ == '__main__':
             break
 
         origin_h, origin_w = frame.shape[:2]
-        # 不同算法及训练模型的blobFromImage参数不同，可访问opencv的github地址查询
         # https://github.com/opencv/opencv/tree/master/samples/dnn
         blob = cv.dnn.blobFromImage(
             cv.resize(frame, (300, 300)), 1.0 / 127.5, (300, 300), 127.5)
         net.setInput(blob)
-        # 前向传播计算输出，YOLOv3有三个输出层
         detections = net.forward()
         for i in range(0, detections.shape[2]):
             confidence = detections[0, 0, i, 2]
