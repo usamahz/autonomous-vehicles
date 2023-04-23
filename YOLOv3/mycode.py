@@ -7,11 +7,11 @@ from imutils.video import FPS
 
 file_path = os.path.dirname(os.path.abspath(__file__)) + os.sep
 outputFile = file_path + "test_out" + os.sep
-confThreshold = 0.5  
-nmsThreshold = 0.4  
-inpWidth, inpHeight = 416, 416 
+confThreshold = 0.5
+nmsThreshold = 0.4
+inpWidth, inpHeight = 416, 416
 
-parser = argparse.ArgumentParser(description='Object Detection using YOLOv3)
+parser = argparse.ArgumentParser(description='Object Detection using YOLOv3')
 parser.add_argument('--image', help='Path to image file.')
 parser.add_argument('--video', help='Path to video file.')
 args = parser.parse_args()
@@ -40,7 +40,7 @@ def choose_run_mode():
 def get_coco_classes():
     classes_path = file_path+'Model'+os.sep+'coco.names'
     with open(classes_path, 'rt') as f:
-        classes = f.read().split('\n')[:-1] 
+        classes = f.read().split('\n')[:-1]
     return classes
 
 
@@ -57,10 +57,10 @@ def load_pretrain_model():
 
 def get_output_layers(net):
     layers_names = net.getLayerNames()
-    print('layers_names=',layers_names)
+    print('layers_names=', layers_names)
     for i in net.getUnconnectedOutLayers():
-        print('i=',i)
-    print('net.getUnconnectedOutLayers()=',net.getUnconnectedOutLayers())
+        print('i=', i)
+    print('net.getUnconnectedOutLayers()=', net.getUnconnectedOutLayers())
     return [layers_names[i - 1] for i in net.getUnconnectedOutLayers()]
 
 
@@ -73,10 +73,12 @@ def remove_non_max_boxes(detections):
             confidence = scores[class_id]
             if confidence > confThreshold:
                 center_x, center_y = int(tep[0]*origin_w), int(tep[1]*origin_h)
-                box_width, box_height = int(tep[2]*origin_w), int(tep[3]*origin_h)
-                box_left, box_top = int(center_x - box_width/2), int(center_y - box_height/2)
+                box_width, box_height = int(
+                    tep[2]*origin_w), int(tep[3]*origin_h)
+                box_left, box_top = int(
+                    center_x - box_width/2), int(center_y - box_height/2)
                 class_ids.append(class_id)
-                confidences.append(float(confidence))  
+                confidences.append(float(confidence))
                 boxes.append([box_left, box_top, box_width, box_height])
     indices = cv.dnn.NMSBoxes(boxes, confidences, confThreshold, nmsThreshold)
     for i in indices:
@@ -84,30 +86,36 @@ def remove_non_max_boxes(detections):
         box = boxes[i]
         x_start, y_start = box[0], box[1]
         x_end, y_end = x_start+box[2], y_start+box[3]
-        draw_box_label(class_ids[i], confidences[i], x_start, y_start, x_end, y_end)
+        draw_box_label(class_ids[i], confidences[i],
+                       x_start, y_start, x_end, y_end)
 
 
 def draw_box_label(class_id, confidence, x_start, y_start, x_end, y_end):
     cv.rectangle(frame, (x_start, y_start), (x_end, y_end), (255, 178, 50), 2)
     label = '{0}: {1:.2f}%'.format(classes[class_id], confidence * 100)
-    label_size, base_line = cv.getTextSize(label, cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+    label_size, base_line = cv.getTextSize(
+        label, cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)
     top = max(y_start, label_size[1])
     cv.rectangle(frame, (x_start, top - round(1.2 * label_size[1])),
                  (x_start + round(1.5 * label_size[0]), top + base_line),
                  (255, 255, 255), cv.FILLED)
-    cv.putText(frame, label, (x_start, top), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+    cv.putText(frame, label, (x_start, top),
+               cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
 
 
 def show_status(frame):
     t, _ = net.getPerfProfile()
-    inf_label = 'Inference time: %.2f ms' % (t * 1000.0 / cv.getTickFrequency())
-    cv.putText(frame, inf_label, (0, origin_h-50), cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+    inf_label = 'Inference time: %.2f ms' % (
+        t * 1000.0 / cv.getTickFrequency())
+    cv.putText(frame, inf_label, (0, origin_h-50),
+               cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
     if not args.image:
         fps.update()
         fps.stop()
         fps_label = "FPS: {:.2f}".format(fps.fps())
-        cv.putText(frame, fps_label, (0, origin_h-25), cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+        cv.putText(frame, fps_label, (0, origin_h-25),
+                   cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
 
 if __name__ == '__main__':
@@ -125,9 +133,11 @@ if __name__ == '__main__':
             print("Output file is stored as ", outputFile)
             cv.waitKey(3000)
             break
+
         origin_h, origin_w = frame.shape[:2]
         # https://github.com/opencv/opencv/tree/master/samples/dnn
-        blob = cv.dnn.blobFromImage(frame, 1 / 255, (inpWidth, inpHeight), [0, 0, 0], 1, crop=False)
+        blob = cv.dnn.blobFromImage(
+            frame, 1 / 255, (inpWidth, inpHeight), [0, 0, 0], 1, crop=False)
         net.setInput(blob)
         detections = net.forward(get_output_layers(net))
         remove_non_max_boxes(detections)
@@ -136,13 +146,13 @@ if __name__ == '__main__':
         if args.image:
             cv.imwrite(outputFile, frame)
         else:
-
             vid_writer.write(frame)
 
-        winName = 'YOLOv3 object detection in OpenCV'
-        cv.imshow(winName, frame)
+        windowName = 'YOLOv3 object detection in OpenCV'
+        cv.imshow(windowName, frame)
 
     if not args.image:
         vid_writer.release()
         cap.release()
+
     cv.destroyAllWindows()
