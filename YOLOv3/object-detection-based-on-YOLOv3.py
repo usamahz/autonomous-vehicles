@@ -169,9 +169,9 @@ if __name__ == '__main__':
 
             vid_writer.write(frame)
 
-        winName = 'YOLOv3 object detection in OpenCV'
-        # cv.namedWindow(winName, cv.WINDOW_NORMAL)
-        cv.imshow(winName, frame)
+        windowName = 'YOLOv3 object detection in OpenCV'
+        # cv.namedWindow(windowName, cv.WINDOW_NORMAL)
+        cv.imshow(windowName, frame)
 
     if not args.image:
         vid_writer.release()
