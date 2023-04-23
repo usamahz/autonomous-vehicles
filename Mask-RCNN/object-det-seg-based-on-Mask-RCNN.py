@@ -72,7 +72,8 @@ def load_pretrain_model():
     """
     load the pre-trained graph models and set net
     """
-    text_graph = str(file_path/'model/mask_rcnn_inception_v2_coco_2018_01_28.pbtxt')
+    text_graph = str(
+        file_path/'model/mask_rcnn_inception_v2_coco_2018_01_28.pbtxt')
     model_weights = str(file_path/"model/frozen_inference_graph.pb")
     net = cv.dnn.readNetFromTensorflow(model_weights, text_graph)
     net.setPreferableBackend(cv.dnn.DNN_BACKEND_OPENCV)
@@ -123,7 +124,8 @@ def visualize(boxes, masks):
             pre_mask = pre_mask[class_id]
 
             # Draw bounding box, colorize and show the pre_mask on the image
-            draw_box_mask(frame, class_id, score, left, top, right, bottom, pre_mask)
+            draw_box_mask(frame, class_id, score, left,
+                          top, right, bottom, pre_mask)
 
 
 def draw_box_mask(frame, class_id, conf, left, top, right, bottom, pre_mask):
@@ -138,11 +140,13 @@ def draw_box_mask(frame, class_id, conf, left, top, right, bottom, pre_mask):
         assert(class_id < len(classes))
         class_label = '%s:%s' % (classes[class_id], class_label)
     # Display the label at the top of the bounding box
-    label_size, base_line = cv.getTextSize(class_label, cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+    label_size, base_line = cv.getTextSize(
+        class_label, cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)
     top = max(top, label_size[1])
     cv.rectangle(frame, (left, top - round(1.5*label_size[1])), (left + round(1.5*label_size[0]), top + base_line),
                  (255, 255, 255), cv.FILLED)
-    cv.putText(frame, class_label, (left, top), cv.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 0), 2)
+    cv.putText(frame, class_label, (left, top),
+               cv.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 0), 2)
 
     # Draw the contours of detections
     # 将mask从原始输出的15*15尺度 根据bounding box的大小进行还原
@@ -154,11 +158,14 @@ def draw_box_mask(frame, class_id, conf, left, top, right, bottom, pre_mask):
 
     color = colors[class_id % len(colors)]
     # mask内部的区域 用浅色填充
-    frame[top:bottom+1, left:right+1][mask_bool] = ([0.3 * color[0], 0.3 * color[1], 0.3 * color[2]] + 0.7 * roi).astype(np.uint8)
+    frame[top:bottom+1, left:right+1][mask_bool] = (
+        [0.3 * color[0], 0.3 * color[1], 0.3 * color[2]] + 0.7 * roi).astype(np.uint8)
     # 根据mask范围 画contour包络线
     mask = mask_bool.astype(np.uint8)
-    contours, hierarchy = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-    cv.drawContours(frame[top: bottom+1, left: right+1], contours, -1, color, 3, cv.LINE_8, hierarchy, 2)
+    contours, hierarchy = cv.findContours(
+        mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+    cv.drawContours(frame[top: bottom+1, left: right+1],
+                    contours, -1, color, 3, cv.LINE_8, hierarchy, 2)
 
 
 def show_status(frame):
@@ -168,19 +175,23 @@ def show_status(frame):
     # Put efficiency information. The function getPerfProfile returns the
     # overall time for inference(t) and the timings for each of the layers(in layersTimes)
     t, _ = net.getPerfProfile()
-    inf_label = 'Inference time: %.2f ms' % (t * 1000.0 / cv.getTickFrequency())
-    cv.putText(frame, inf_label, (0, 15), cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+    inf_label = 'Inference time: %.2f ms' % (
+        t * 1000.0 / cv.getTickFrequency())
+    cv.putText(frame, inf_label, (0, 15),
+               cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
     if not args.image:
         fps.update()
         fps.stop()
         fps_label = "FPS: {:.2f}".format(fps.fps())
-        cv.putText(frame, fps_label, (0, 40), cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+        cv.putText(frame, fps_label, (0, 40),
+                   cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='Mask-RCNN object detection and segmentation')
+    parser = argparse.ArgumentParser(
+        description='Mask-RCNN object detection and segmentation')
     parser.add_argument('--image', help='Path to image file')
     parser.add_argument('--video', help='Path to video file.')
     args = parser.parse_args()
@@ -219,12 +230,10 @@ if __name__ == "__main__":
         else:
             video_writer.write(frame.astype(np.uint8))
 
-        winName = 'Mask-RCNN Object-detection and Segmentation'
-        cv.imshow(winName, frame)
+        windowName = 'Mask-RCNN Object-detection and Segmentation'
+        cv.imshow(windowName, frame)
 
     if not args.image:
         video_writer.release()
         cap.release()
     cv.destroyAllWindows()
-
-
