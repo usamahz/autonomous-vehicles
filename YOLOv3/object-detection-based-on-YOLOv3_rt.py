@@ -12,7 +12,8 @@ nmsThreshold = 0.4   # Non-maximum suppression threshold（非最大抑制）
 inpWidth, inpHeight = 416, 416       # Width & height of network's input image
 
 # Usage example:  python object-detection-based-on-YOLOv3.py --video=run.mp4
-parser = argparse.ArgumentParser(description='Object Detection using YOLO in OPENCV')
+parser = argparse.ArgumentParser(
+    description='Object Detection using YOLO in OPENCV')
 parser.add_argument('--image', help='Path to image file.')
 parser.add_argument('--video', help='Path to video file.')
 args = parser.parse_args()
@@ -67,12 +68,12 @@ def load_pretrain_model():
 def get_output_layers(net):
     # Get the names of all the layers in the network
     layers_names = net.getLayerNames()
-    print('layers_names=',layers_names)
+    print('layers_names=', layers_names)
     for i in net.getUnconnectedOutLayers():
-        print('i=',i)
+        print('i=', i)
     # Get the names of the output layers,
     # yolov3中有类似于ssd的多尺度输出，这里有3个yolo层作输出，分别是200， 227， 254
-    print('net.getUnconnectedOutLayers()=',net.getUnconnectedOutLayers())
+    print('net.getUnconnectedOutLayers()=', net.getUnconnectedOutLayers())
     return [layers_names[i - 1] for i in net.getUnconnectedOutLayers()]
 
 
@@ -89,8 +90,10 @@ def remove_non_max_boxes(detections):
             confidence = scores[class_id]
             if confidence > confThreshold:
                 center_x, center_y = int(tep[0]*origin_w), int(tep[1]*origin_h)
-                box_width, box_height = int(tep[2]*origin_w), int(tep[3]*origin_h)
-                box_left, box_top = int(center_x - box_width/2), int(center_y - box_height/2)
+                box_width, box_height = int(
+                    tep[2]*origin_w), int(tep[3]*origin_h)
+                box_left, box_top = int(
+                    center_x - box_width/2), int(center_y - box_height/2)
                 class_ids.append(class_id)
                 confidences.append(float(confidence))  # 注意将numpy.float转换为float
                 boxes.append([box_left, box_top, box_width, box_height])
@@ -102,32 +105,38 @@ def remove_non_max_boxes(detections):
         x_start, y_start = box[0], box[1]
         x_end, y_end = x_start+box[2], y_start+box[3]
         # 画bounding box以及label
-        draw_box_label(class_ids[i], confidences[i], x_start, y_start, x_end, y_end)
+        draw_box_label(class_ids[i], confidences[i],
+                       x_start, y_start, x_end, y_end)
 
 
 def draw_box_label(class_id, confidence, x_start, y_start, x_end, y_end):
     cv.rectangle(frame, (x_start, y_start), (x_end, y_end), (255, 178, 50), 2)
     label = '{0}: {1:.2f}%'.format(classes[class_id], confidence * 100)
-    label_size, base_line = cv.getTextSize(label, cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+    label_size, base_line = cv.getTextSize(
+        label, cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)
     top = max(y_start, label_size[1])
     cv.rectangle(frame, (x_start, top - round(1.2 * label_size[1])),
                  (x_start + round(1.5 * label_size[0]), top + base_line),
                  (255, 255, 255), cv.FILLED)
-    cv.putText(frame, label, (x_start, top), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+    cv.putText(frame, label, (x_start, top),
+               cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
 
 
 def show_status(frame):
     # Put efficiency information. The function getPerfProfile returns the
     # overall time for inference(t) and the timings for each of the layers(in layersTimes)
     t, _ = net.getPerfProfile()
-    inf_label = 'Inference time: %.2f ms' % (t * 1000.0 / cv.getTickFrequency())
-    cv.putText(frame, inf_label, (0, origin_h-50), cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+    inf_label = 'Inference time: %.2f ms' % (
+        t * 1000.0 / cv.getTickFrequency())
+    cv.putText(frame, inf_label, (0, origin_h-50),
+               cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
     if not args.image:
         fps.update()
         fps.stop()
         fps_label = "FPS: {:.2f}".format(fps.fps())
-        cv.putText(frame, fps_label, (0, origin_h-25), cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+        cv.putText(frame, fps_label, (0, origin_h-25),
+                   cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
 
 if __name__ == '__main__':
@@ -152,7 +161,8 @@ if __name__ == '__main__':
         origin_h, origin_w = frame.shape[:2]
         # 不同算法及训练模型的blobFromImage参数不同，可访问opencv的github地址查询
         # https://github.com/opencv/opencv/tree/master/samples/dnn
-        blob = cv.dnn.blobFromImage(frame, 1 / 255, (inpWidth, inpHeight), [0, 0, 0], 1, crop=False)
+        blob = cv.dnn.blobFromImage(
+            frame, 1 / 255, (inpWidth, inpHeight), [0, 0, 0], 1, crop=False)
         net.setInput(blob)
         # 前向传播计算输出，YOLOv3有三个输出层
         detections = net.forward(get_output_layers(net))
@@ -168,9 +178,9 @@ if __name__ == '__main__':
 
             vid_writer.write(frame)
 
-        winName = 'YOLOv3 object detection in OpenCV'
-        # cv.namedWindow(winName, cv.WINDOW_NORMAL)
-        cv.imshow(winName, frame)
+        windowName = 'YOLOv3 object detection in OpenCV'
+        # cv.namedWindow(windowName, cv.WINDOW_NORMAL)
+        cv.imshow(windowName, frame)
 
     if not args.image:
         vid_writer.release()
