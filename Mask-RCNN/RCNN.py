@@ -9,10 +9,10 @@ from imutils.video import FPS
 file_path = Path.cwd()
 out_file_path = Path(file_path / "test_out/")
 
-confThreshold = 0.7  
-maskThreshold = 0.2  
-classes = []  
-colors = [] 
+confThreshold = 0.7
+maskThreshold = 0.2
+classes = []
+colors = []
 
 
 def choose_run_mode():
@@ -56,7 +56,8 @@ def load_colors():
 
 
 def load_pretrain_model():
-    text_graph = str(file_path/'model/mask_rcnn_inception_v2_coco_2018_01_28.pbtxt')
+    text_graph = str(
+        file_path/'model/mask_rcnn_inception_v2_coco_2018_01_28.pbtxt')
     model_weights = str(file_path/"model/frozen_inference_graph.pb")
     net = cv.dnn.readNetFromTensorflow(model_weights, text_graph)
     net.setPreferableBackend(cv.dnn.DNN_BACKEND_OPENCV)
@@ -93,7 +94,8 @@ def visualize(boxes, masks):
 
             pre_mask = pre_mask[class_id]
 
-            draw_box_mask(frame, class_id, score, left, top, right, bottom, pre_mask)
+            draw_box_mask(frame, class_id, score, left,
+                          top, right, bottom, pre_mask)
 
 
 def draw_box_mask(frame, class_id, conf, left, top, right, bottom, pre_mask):
@@ -102,37 +104,46 @@ def draw_box_mask(frame, class_id, conf, left, top, right, bottom, pre_mask):
     if classes:
         assert(class_id < len(classes))
         class_label = '%s:%s' % (classes[class_id], class_label)
-    label_size, base_line = cv.getTextSize(class_label, cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+    label_size, base_line = cv.getTextSize(
+        class_label, cv.FONT_HERSHEY_SIMPLEX, 0.5, 1)
     top = max(top, label_size[1])
     cv.rectangle(frame, (left, top - round(1.5*label_size[1])), (left + round(1.5*label_size[0]), top + base_line),
                  (255, 255, 255), cv.FILLED)
-    cv.putText(frame, class_label, (left, top), cv.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 0), 2)
+    cv.putText(frame, class_label, (left, top),
+               cv.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 0), 2)
     mask = cv.resize(pre_mask, (right - left + 1, bottom - top + 1))
     mask_bool = (mask > maskThreshold)
     roi = frame[top: bottom+1, left: right+1][mask_bool]
 
     color = colors[class_id % len(colors)]
-    frame[top:bottom+1, left:right+1][mask_bool] = ([0.3 * color[0], 0.3 * color[1], 0.3 * color[2]] + 0.7 * roi).astype(np.uint8)
+    frame[top:bottom+1, left:right+1][mask_bool] = (
+        [0.3 * color[0], 0.3 * color[1], 0.3 * color[2]] + 0.7 * roi).astype(np.uint8)
     mask = mask_bool.astype(np.uint8)
-    contours, hierarchy = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-    cv.drawContours(frame[top: bottom+1, left: right+1], contours, -1, color, 3, cv.LINE_8, hierarchy, 2)
+    contours, hierarchy = cv.findContours(
+        mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+    cv.drawContours(frame[top: bottom+1, left: right+1],
+                    contours, -1, color, 3, cv.LINE_8, hierarchy, 2)
 
 
 def show_status(frame):
     t, _ = net.getPerfProfile()
-    inf_label = 'Inference time: %.2f ms' % (t * 1000.0 / cv.getTickFrequency())
-    cv.putText(frame, inf_label, (0, 15), cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+    inf_label = 'Inference time: %.2f ms' % (
+        t * 1000.0 / cv.getTickFrequency())
+    cv.putText(frame, inf_label, (0, 15),
+               cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
     if not args.image:
         fps.update()
         fps.stop()
         fps_label = "FPS: {:.2f}".format(fps.fps())
-        cv.putText(frame, fps_label, (0, 40), cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+        cv.putText(frame, fps_label, (0, 40),
+                   cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='Mask-RCNN object detection and segmentation')
+    parser = argparse.ArgumentParser(
+        description='Mask-RCNN object detection and segmentation')
     parser.add_argument('--image', help='Path to image file')
     parser.add_argument('--video', help='Path to video file.')
     args = parser.parse_args()
@@ -160,12 +171,10 @@ if __name__ == "__main__":
         else:
             video_writer.write(frame.astype(np.uint8))
 
-        winName = 'Object-detection and Segmentation using Mask-RCNN'
-        cv.imshow(winName, frame)
+        windowName = 'Object-detection and Segmentation using Mask-RCNN'
+        cv.imshow(windowName, frame)
 
     if not args.image:
         video_writer.release()
         cap.release()
     cv.destroyAllWindows()
-
-
