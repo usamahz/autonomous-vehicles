@@ -29,7 +29,7 @@ def choose_run_mode(out_path):
     if args.image:
         # Open the image file
         if not os.path.isfile(args.image):
-            print("Input image file ", args.image, " doesn't exist")
+            print("Input image file ", args.image, " does not exist")
             sys.exit(1)
         cap = cv.VideoCapture(args.image)
         global outputFile
@@ -81,7 +81,6 @@ def show_status(frame):
 
 
 if __name__ == '__main__':
-    # -----main process---------------------------------------------------
     # choosing image/video/webcam
     cap = choose_run_mode(outputFile)
     # load YOLOv3 darknet model
@@ -125,9 +124,9 @@ if __name__ == '__main__':
         else:
             vid_writer.write(frame)
 
-        winName = 'SSD object detection in OpenCV'
-        # cv.namedWindow(winName, cv.WINDOW_NORMAL)
-        cv.imshow(winName, frame)
+        windowName = 'SSD object detection in OpenCV'
+        # cv.namedWindow(windowName, cv.WINDOW_NORMAL)
+        cv.imshow(windowName, frame)
 
     if not args.image:
         vid_writer.release()
