@@ -9,16 +9,18 @@ import cv2 as cv
 
 file_path = os.path.dirname(os.path.abspath(__file__)) + os.sep
 outputFile = file_path + "test_out" + os.sep
-threshold = 0.5 
+threshold = 0.5
 inpWidth, inpHeight = 300, 300
 CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow",
-		   "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
+           "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 COLORS = np.random.uniform(0, 180, size=(len(CLASSES), 3))
 
-parser = argparse.ArgumentParser(description='Object Detection using YOLO in OPENCV')
+parser = argparse.ArgumentParser(
+    description='Object Detection using YOLO in OPENCV')
 parser.add_argument('--image', help='Path to image file.')
 parser.add_argument('--video', help='Path to video file.')
 args = parser.parse_args()
+
 
 def choose_run_mode(out_path):
     if args.image:
@@ -38,13 +40,13 @@ def choose_run_mode(out_path):
         cap = cv.VideoCapture(0)
         outputFile += 'webcam_out.mp4'
 
-
     return cap
 
 
 def load_pretrain_model():
     prototxt_file = file_path + 'Model' + os.sep + 'MobileNetSSD_deploy.prototxt'
-    caffemodel_file = file_path + 'Model' + os.sep + 'MobileNetSSD_deploy.caffemodel'
+    caffemodel_file = file_path + 'Model' + \
+        os.sep + 'MobileNetSSD_deploy.caffemodel'
     net = cv.dnn.readNetFromCaffe(prototxt_file, caffeModel=caffemodel_file)
     print('MobileNetSSD caffe model loaded successfully')
     net.setPreferableBackend(cv.dnn.DNN_BACKEND_OPENCV)
@@ -54,14 +56,17 @@ def load_pretrain_model():
 
 def show_status(frame):
     t, _ = net.getPerfProfile()
-    inf_label = 'Inference time: %.2f ms' % (t * 1000.0 / cv.getTickFrequency())
-    cv.putText(frame, inf_label, (0, origin_h-50), cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+    inf_label = 'Inference time: %.2f ms' % (
+        t * 1000.0 / cv.getTickFrequency())
+    cv.putText(frame, inf_label, (0, origin_h-50),
+               cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
     if not args.image:
         fps.update()
         fps.stop()
         fps_label = "FPS: {:.2f}".format(fps.fps())
-        cv.putText(frame, fps_label, (0, origin_h-25), cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+        cv.putText(frame, fps_label, (0, origin_h-25),
+                   cv.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
 
 if __name__ == '__main__':
@@ -79,27 +84,32 @@ if __name__ == '__main__':
             cv.waitKey(3000)
             break
         origin_h, origin_w = frame.shape[:2]
-        blob = cv.dnn.blobFromImage(cv.resize(frame, (300, 300)), 1.0 / 127.5, (300, 300), 127.5)
+        blob = cv.dnn.blobFromImage(
+            cv.resize(frame, (300, 300)), 1.0 / 127.5, (300, 300), 127.5)
         net.setInput(blob)
         detections = net.forward()
         for i in range(0, detections.shape[2]):
             confidence = detections[0, 0, i, 2]
             if confidence > threshold:
                 idx = int(detections[0, 0, i, 1])
-                bounding_box = detections[0, 0, i, 3:7] * np.array([origin_w, origin_h, origin_w, origin_h])
+                bounding_box = detections[0, 0, i, 3:7] * \
+                    np.array([origin_w, origin_h, origin_w, origin_h])
                 x_start, y_start, x_end, y_end = bounding_box.astype('int')
                 label = '{0}: {1:.2f}%'.format(CLASSES[idx], confidence * 100)
-                cv.rectangle(frame, (x_start, y_start), (x_end, y_end), COLORS[idx], 2)
-                cv.rectangle(frame, (x_start, y_start - 18), (x_end, y_start), COLORS[idx], -1)
-                cv.putText(frame, label, (x_start + 2, y_start - 5), cv.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+                cv.rectangle(frame, (x_start, y_start),
+                             (x_end, y_end), COLORS[idx], 2)
+                cv.rectangle(frame, (x_start, y_start - 18),
+                             (x_end, y_start), COLORS[idx], -1)
+                cv.putText(frame, label, (x_start + 2, y_start - 5),
+                           cv.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
         show_status(frame)
         if (args.image):
             cv.imwrite(outputFile, frame)
         else:
             vid_writer.write(frame)
 
-        winName = 'SSD Object Detection'
-        cv.imshow(winName, frame)
+        windowName = 'SSD Object Detection'
+        cv.imshow(windowName, frame)
 
     if not args.image:
         vid_writer.release()
