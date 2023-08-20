@@ -1,4 +1,4 @@
-#WIP
+#Work in progress - feel free to play around with!
 
 
 # import the needed libraries
