@@ -6,8 +6,4 @@ Then place it to `weights` folder.
 ### Usage Examples :
 
 Put the test file (image only) to `test_images` folder.  
- command line input: `python yolo.py` or `python yolo_tf.py`
-
-### Note
-
-Two scripts here provided are nearly same, for `yolo_tf.py` uses some **tf constructor API** methods for functions like _Non-max Minimum_, etc.
+ command line input: `python YOLOv1.py`

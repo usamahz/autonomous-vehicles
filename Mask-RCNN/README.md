@@ -4,8 +4,8 @@ You can download the package by clicking [here](http://download.tensorflow.org/m
 ### Usage Examples :
 Put the test file (iamge or video) under the same directory   
    
-`python3 object-det-seg-based-on-Mask-RCNN.py --image=test.jpg`   
-`python3 object-det-seg-based-on-Mask-RCNN.py --video=test.mp4`   
+`python3 RCNN.py --image=test.jpg`   
+`python3 RCNN.py --video=test.mp4`   
 if no argument provided, it starts the webcam.
 
 ### Note
