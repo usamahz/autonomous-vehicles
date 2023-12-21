@@ -45,7 +45,3 @@ This repository contains the implementation of Convolutional Neural Networks (CN
 ### Contributing
 
 If you'd like to contribute to this project, please follow the contribution guidelines.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
