@@ -1,44 +1,67 @@
-#Work in progress - feel free to play around with!
-
-
-# import the needed libraries
 import tensorflow as tf
 import tensorflow.contrib.tensorrt as trt
 from tensorflow.python.platform import gfile
 
+def load_model(sess, model_path):
+    saver = tf.train.import_meta_graph(model_path)
+    saver.restore(sess, model_path.replace('.meta', ''))
 
+def convert_to_frozen_graph(sess, output_node_names):
+    return tf.graph_util.convert_variables_to_constants(
+        sess,
+        tf.get_default_graph().as_graph_def(),
+        output_node_names
+    )
 
-
-with tf.Session(config=tf.ConfigProto(gpu_options=tf.GPUOptions(per_process_gpu_memory_fraction=0.50))) as sess:
-    # import the meta graph of the tensorflow model
-    #saver = tf.train.import_meta_graph("./model/tensorflow/big/model1.meta")
-    saver = tf.train.import_meta_graph("./model/tensorflow/small/model_small.meta")
-    # then, restore the weights to the meta graph
-    #saver.restore(sess, "./model/tensorflow/big/model1")
-    saver.restore(sess, "./model/tensorflow/small/model_small")
-    
-    # specify which tensor output you want to obtain 
-    # (correspond to prediction result)
-    your_outputs = ["output_tensor/Softmax"]
-    
-    # convert to frozen model
-    frozen_graph = tf.graph_util.convert_variables_to_constants(
-        sess, # session
-        tf.get_default_graph().as_graph_def(),# graph+weight from the session
-        output_node_names=your_outputs)
-    #write the TensorRT model to be used later for inference
-    with gfile.FastGFile("./model/frozen_model.pb", 'wb') as f:
+def save_frozen_graph(frozen_graph, output_path):
+    with gfile.FastGFile(output_path, 'wb') as f:
         f.write(frozen_graph.SerializeToString())
-    print("Frozen model is successfully stored!")
-    
-trt_graph = trt.create_inference_graph(
-    input_graph_def=frozen_graph,# frozen model
-    outputs=your_outputs,
-    max_batch_size=2,# specify your max batch size
-    max_workspace_size_bytes=2*(10**9),# specify the max workspace
-    precision_mode="FP32") # precision, can be "FP32" (32 floating point precision) or "FP16"
+    print(f"Frozen model is successfully stored at: {output_path}")
 
-#write the TensorRT model to be used later for inference
-with gfile.FastGFile("./model/TensorRT_model.pb", 'wb') as f:
-    f.write(trt_graph.SerializeToString())
-print("TensorRT model is successfully stored!")
+def create_trt_graph(frozen_graph, outputs, max_batch_size, max_workspace_size_bytes, precision_mode):
+    return trt.create_inference_graph(
+        input_graph_def=frozen_graph,
+        outputs=outputs,
+        max_batch_size=max_batch_size,
+        max_workspace_size_bytes=max_workspace_size_bytes,
+        precision_mode=precision_mode
+    )
+
+def save_trt_graph(trt_graph, output_path):
+    with gfile.FastGFile(output_path, 'wb') as f:
+        f.write(trt_graph.SerializeToString())
+    print(f"TensorRT model is successfully stored at: {output_path}")
+
+def main():
+    # Configuration
+    model_path = "./model/tensorflow/small/model_small.meta"
+    frozen_graph_path = "./model/frozen_model.pb"
+    trt_graph_path = "./model/TensorRT_model.pb"
+    output_node_names = ["output_tensor/Softmax"]
+    max_batch_size = 2
+    max_workspace_size_bytes = 2 * (10**9)
+    precision_mode = "FP32"
+
+    # TensorFlow session configuration
+    config = tf.ConfigProto(gpu_options=tf.GPUOptions(per_process_gpu_memory_fraction=0.50))
+
+    with tf.Session(config=config) as sess:
+        # Load the model
+        load_model(sess, model_path)
+
+        # Convert to frozen graph
+        frozen_graph = convert_to_frozen_graph(sess, output_node_names)
+        save_frozen_graph(frozen_graph, frozen_graph_path)
+
+        # Create TensorRT graph
+        trt_graph = create_trt_graph(
+            frozen_graph,
+            output_node_names,
+            max_batch_size,
+            max_workspace_size_bytes,
+            precision_mode
+        )
+        save_trt_graph(trt_graph, trt_graph_path)
+
+if __name__ == "__main__":
+    main()
