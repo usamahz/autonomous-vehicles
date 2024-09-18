@@ -91,6 +91,39 @@ Key components:
 3. Configuration files for model parameters
 4. Evaluation scripts for model performance in autonomous driving contexts
 
+## TensorRT Integration
+
+This project includes TensorRT integration for optimized inference on NVIDIA GPUs. TensorRT is used to convert and optimize TensorFlow models for faster inference.
+
+Key TensorRT-related files:
+- `YOLOv3-YOLOv3Tiny/convert_trt.py`
+- `YOLOv4-YOLOv4Tiny/convert_trt.py`
+
+These scripts provide functionality to convert TensorFlow models to TensorRT-optimized models, supporting different precision modes (FP32, FP16, and INT8).
+
+To convert a model to TensorRT format, use:
+
+```
+python convert_trt.py --weights ./checkpoints/yolov4-416 --quantize_mode float16 --output ./checkpoints/yolov4-trt-fp16-416
+```
+
+For benchmarking TensorRT models, refer to:
+- `YOLOv3-YOLOv3Tiny/benchmarks.py`
+- `YOLOv4-YOLOv4Tiny/benchmarks.py`
+
+These benchmarking scripts allow you to compare the performance of TensorFlow, TensorRT, and TFLite models.
+
+## Model Weights
+
+Model weights for each implementation:
+   - YOLOv1: Refer to [YOLOv1/README.md](YOLOv1/README.md) for weight download instructions.
+   - YOLOv3 and YOLOv3-Tiny: Refer to [YOLOv3-YOLOv3Tiny/README.md](YOLOv3-YOLOv3Tiny/README.md) for weight download and conversion instructions.
+   - YOLOv4 and YOLOv4-Tiny: Refer to [YOLOv4-YOLOv4Tiny/README.md](YOLOv4-YOLOv4Tiny/README.md) for weight download and conversion instructions.
+   - MobileNet-SSD: Refer to [MobileNet-SSD/README.md](MobileNet-SSD/README.md) for model information.
+   - Mask R-CNN: Refer to [Mask-RCNN/README.md](Mask-RCNN/README.md) for weight download instructions.
+
+Each sub-README contains specific instructions on how to download and set up the weights for the respective models.
+
 ## Performance
 
 The project includes evaluation metrics for object detection performance in autonomous driving scenarios. The mean Average Precision (mAP) is used as the primary metric. For detailed performance results, refer to the `assets/output.txt` file.
@@ -128,3 +161,4 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
